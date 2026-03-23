@@ -12,6 +12,7 @@ export default async function handler(req, res) {
     try {
       const targetUrl = 'https://presensi.free.beeceptor.com';
       
+      // Meneruskan request ke Beeceptor
       const beeceptorResponse = await fetch(targetUrl, {
         method: 'POST',
         headers: {
@@ -23,6 +24,7 @@ export default async function handler(req, res) {
 
       const responseText = await beeceptorResponse.text();
 
+      // Mengembalikan response hasil dari Beeceptor ke tampilan HTML
       return res.status(200).json({
         status: 'Sukses meneruskan ke Beeceptor',
         beeceptor_status_code: beeceptorResponse.status,
