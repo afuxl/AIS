@@ -10,14 +10,14 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      const targetUrl = 'https://presensi.free.beeceptor.com';
+      const targetUrl = 'https://presensi.free.beeceptor.com/presensi/submit';
       
       // Meneruskan request ke Beeceptor
       const beeceptorResponse = await fetch(targetUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Forwarded-By': 'Vercel-Backend'
+          'X-Forwarded-By': 'anu'
         },
         body: JSON.stringify(req.body || {})
       });
