@@ -2,69 +2,82 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Vercel Payload Tester</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uji Header & Payload Vercel</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; padding: 30px; background: #fafafa; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        textarea { width: 100%; height: 150px; font-family: monospace; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        button { background: #000; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #333; }
-        pre { background: #272822; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 14px; }
-        .label { font-weight: bold; margin-bottom: 8px; display: block; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #f9fafb;
+            color: #111827;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        pre {
+            background-color: #1f2937;
+            color: #e5e7eb;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Kirim Raw Payload ke Vercel</h2>
+    <h2>Inspeksi Request HTTP</h2>
+    <p>Klik tombol di bawah ini untuk mengirim request POST tiruan ke serverless function Vercel.</p>
     
-    <label class="label">Input Raw JSON Payload:</label>
-    <textarea id="payloadInput">{
-  "nama": "Budi",
-  "peran": "Developer",
-  "pesan": "Halo dari Vercel!"
-}</textarea>
+    <button onclick="testEndpoint()">Kirim POST Request</button>
 
-    <button id="sendBtn">Kirim POST Request</button>
+    <h3>Hasil Response:</h3>
+    <pre id="response-output">Menunggu tindakan...</pre>
 
-    <div id="resultSection" style="display:none; margin-top: 30px;">
-        <label class="label">Respon dari Server (Header & Body):</label>
-        <pre id="responseOutput"></pre>
-    </div>
-</div>
+    <script>
+        async function testEndpoint() {
+            const outputBox = document.getElementById('response-output');
+            outputBox.textContent = "Loading...";
 
-<script>
-    document.getElementById('sendBtn').addEventListener('click', async () => {
-        const payloadText = document.getElementById('payloadInput').value;
-        const out = document.getElementById('responseOutput');
-        const resSection = document.getElementById('resultSection');
-        const btn = document.getElementById('sendBtn');
+            try {
+                // Menyiapkan payload simulasi
+                const dataPayload = {
+                    message: "Ini adalah tes payload",
+                    timestamp: new Date().toISOString(),
+                    user_id: 12345
+                };
 
-        btn.innerText = 'Mengirim...';
-        out.innerText = 'Menunggu respon...';
-        resSection.style.display = 'block';
+                // Melakukan request ke serverless function
+                const response = await fetch('/api/check-header', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Custom-Header': 'NilaiHeaderRahasia',
+                        'Authorization': 'Bearer token_simulasi_123'
+                    },
+                    body: JSON.stringify(dataPayload)
+                });
 
-        try {
-            // Validasi JSON sederhana
-            const parsedPayload = JSON.parse(payloadText);
+                // Mem-parsing dan menampilkan hasil
+                const result = await response.json();
+                outputBox.textContent = JSON.stringify(result, null, 4);
 
-            const response = await fetch('/api/check-headers', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(parsedPayload)
-            });
-
-            const result = await response.json();
-            out.innerText = JSON.stringify(result, null, 2);
-        } catch (e) {
-            out.innerText = "Error: " + (e.name === 'SyntaxError' ? "Format JSON tidak valid!" : e.message);
-        } finally {
-            btn.innerText = 'Kirim POST Request';
+            } catch (error) {
+                outputBox.textContent = "Terjadi kesalahan: " + error.message;
+            }
         }
-    });
-</script>
-
+    </script>
 </body>
 </html>
