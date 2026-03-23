@@ -25,11 +25,7 @@ export default async function handler(req, res) {
       const responseText = await beeceptorResponse.text();
 
       // Mengembalikan response hasil dari Beeceptor ke tampilan HTML
-      return res.status(200).json({
-        status: 'Sukses meneruskan ke Beeceptor',
-        beeceptor_status_code: beeceptorResponse.status,
-        beeceptor_response: responseText,
-        payload_sent: req.body
+      return res.status(200).json({responseText
       });
 
     } catch (error) {
