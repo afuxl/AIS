@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uji Header & Payload Vercel</title>
+    <title>Uji Vercel ke Beeceptor (Raw JSON)</title>
     <style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
@@ -13,8 +13,20 @@
             background-color: #f9fafb;
             color: #111827;
         }
+        textarea {
+            width: 100%;
+            height: 150px;
+            font-family: monospace;
+            font-size: 14px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            background-color: #ffffff;
+        }
         button {
-            background-color: #2563eb;
+            background-color: #10b981;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -24,7 +36,7 @@
             margin-bottom: 20px;
         }
         button:hover {
-            background-color: #1d4ed8;
+            background-color: #059669;
         }
         pre {
             background-color: #1f2937;
@@ -34,43 +46,64 @@
             overflow-x: auto;
             font-size: 14px;
         }
+        .error {
+            color: #dc2626;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-    <h2>Inspeksi Request HTTP</h2>
-    <p>Klik tombol di bawah ini untuk mengirim request POST tiruan ke serverless function Vercel.</p>
-    
-    <button onclick="testEndpoint()">Kirim POST Request</button>
+    <h2>Input Raw JSON (POST ke Beeceptor)</h2>
+    <p>Masukkan payload JSON Anda pada kotak di bawah ini.</p>
 
-    <h3>Hasil Response:</h3>
+    <div id="error-msg" class="error">Error: Format JSON tidak valid! Pastikan menggunakan tanda kutip ganda ("").</div>
+    
+    <textarea id="json-input">
+{
+    "nama_event": "uji_coba_raw_input",
+    "angka_acak": 99,
+    "pesan": "Halo dari Vercel!"
+}
+    </textarea>
+    
+    <button onclick="testBackendFetch()">Kirim POST Request</button>
+
+    <h3>Hasil Response dari Backend:</h3>
     <pre id="response-output">Menunggu tindakan...</pre>
 
     <script>
-        async function testEndpoint() {
+        async function testBackendFetch() {
             const outputBox = document.getElementById('response-output');
-            outputBox.textContent = "Loading...";
+            const jsonInputBox = document.getElementById('json-input');
+            const errorMsg = document.getElementById('error-msg');
+            
+            let parsedData;
+
+            // Memeriksa apakah teks di textarea adalah JSON yang valid
+            try {
+                parsedData = JSON.parse(jsonInputBox.value);
+                errorMsg.style.display = 'none';
+            } catch (e) {
+                errorMsg.style.display = 'block';
+                outputBox.textContent = "Pengiriman dibatalkan karena format JSON tidak valid.";
+                return;
+            }
+
+            outputBox.textContent = "Loading... Meneruskan payload ke Beeceptor melalui Vercel";
 
             try {
-                // Menyiapkan payload simulasi
-                const dataPayload = {
-                    message: "Ini adalah tes payload",
-                    timestamp: new Date().toISOString(),
-                    user_id: 12345
-                };
-
-                // Melakukan request ke serverless function
-                const response = await fetch('/api/check-headers', {
+                // Mengirim payload JSON ke backend Vercel
+                const response = await fetch('/api/check-header', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-Custom-Header': 'NilaiHeaderRahasia',
-                        'Authorization': 'Bearer token_simulasi_123'
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(dataPayload)
+                    body: JSON.stringify(parsedData)
                 });
 
-                // Mem-parsing dan menampilkan hasil
                 const result = await response.json();
                 outputBox.textContent = JSON.stringify(result, null, 4);
 
